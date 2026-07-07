@@ -1,0 +1,3 @@
+# Visão
+
+Onde queremos estar daqui cinco anos? Escreverei aqui sobre a visão de futuro que tenho sobre o projeto, sobre este lugar que pretendo desenvolver, de início já proponho que, em minhas vontades, desejo que este lugar um dia possa se tornar algo além da tela, algo físico, como por exemplos cadernos comuns, páginas brancas com linhas para escrita e até mesmo folhas em branco para desenho, quero dar possibilidade para as pessoas enxergarem e conseguirem optar por esse lugar !
