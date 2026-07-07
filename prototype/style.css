@@ -1,0 +1,131 @@
+:root {
+  --background: #f8f6f2;
+  --paper: #fffdf9;
+  --text: #2d2b2a;
+  --muted: #8a8178;
+  --accent: #c8a977;
+}
+
+body.dark {
+  --background: #191816;
+  --paper: #24221f;
+  --text: #ece8e1;
+  --muted: #aaa197;
+  --accent: #d8b97f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  background: var(--background);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Tela inicial */
+
+.welcome {
+  text-align: center;
+  padding: 2rem;
+}
+
+.light-dot {
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin: 0 auto 2rem;
+  box-shadow: 0 0 24px var(--accent);
+}
+
+.small-text {
+  color: var(--muted);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+button {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--muted);
+  padding: 0.7rem 1.2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: 0.2s ease;
+}
+
+button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Área de escrita */
+
+.hidden {
+  display: none;
+}
+
+.writing-area {
+  width: 100%;
+  max-width: 850px;
+  padding: 2rem;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.paper {
+  background: var(--paper);
+  min-height: 70vh;
+  padding: 4rem;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+.question {
+  color: var(--muted);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+textarea {
+  width: 100%;
+  min-height: 420px;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  color: var(--text);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.25rem;
+  line-height: 1.8;
+}
+
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.save-status {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 1rem;
+}

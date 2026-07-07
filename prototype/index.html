@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projeto Lugar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <section id="welcome" class="welcome">
+      <div class="light-dot"></div>
+      <p class="small-text">O mundo está quieto agora.</p>
+      <button id="beginButton">Começar</button>
+    </section>
+
+    <section id="writingArea" class="writing-area hidden">
+      <header class="topbar">
+        <span id="dateText"></span>
+        <button id="themeButton">Modo escuro</button>
+      </header>
+
+      <article class="paper">
+        <p id="question" class="question">
+          O que ainda não encontrou palavras?
+        </p>
+
+        <textarea
+          id="entry"
+          placeholder="Escreva aqui, sem pressa..."
+        ></textarea>
+
+        <p id="saveStatus" class="save-status">Guardado neste navegador.</p>
+      </article>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
