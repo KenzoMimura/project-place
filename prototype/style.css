@@ -129,3 +129,10 @@ textarea::placeholder {
   font-size: 0.85rem;
   margin-top: 1rem;
 }
+
+.brand {
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 2rem;
+}
