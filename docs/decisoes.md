@@ -13,3 +13,9 @@ Após explorar nomes ligados a escrita, silêncio, lugares, objetos, animais, lu
 O nome foi escolhido por soar humano, simples, memorável e por carregar a ideia de dizer, expressar e transformar silêncio em palavra, além de ter um significado único e especial para mim, um lugar que eu pude encontrar no mundo real, e com ele aprendi as coisas mais valiosas da vida.
 
 A partir desta decisão, o projeto passa a usar Nimsay como identidade principal durante o desenvolvimento.
+
+## 10/07/2026 — Uma página por data na versão 0.1
+
+A primeira versão do Nimsay organizará as escritas em uma página por data.
+
+Cada dia terá sua própria página, que poderá ser revisitada e editada posteriormente. Essa decisão mantém a experiência simples durante o protótipo e no futuro, poderá ser avaliada a possibilidade de criar várias páginas em um mesmo dia, mas isso não fará parte da versão inicial, infelizmente por conta da complexidade.

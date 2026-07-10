@@ -2,26 +2,63 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta 
-    name="viewport" 
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover" 
-    />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+
   <title>Nimsay</title>
+
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <main class="container">
+
+    <!-- Tela inicial -->
     <section id="welcome" class="welcome">
       <p class="brand">Nimsay</p>
+
       <div class="light-dot"></div>
-      <p class="small-text">O mundo está quieto agora.</p>
-      <button id="beginButton">Começar</button>
+
+      <p class="small-text">
+        O mundo está quieto agora.
+      </p>
+
+      <button id="beginButton" type="button">
+        Começar
+      </button>
     </section>
 
+    <!-- Área de escrita -->
     <section id="writingArea" class="writing-area hidden">
+
       <header class="topbar">
         <span id="dateText"></span>
-        <button id="themeButton">Modo escuro</button>
+
+        <div class="topbar-actions">
+          <button
+            id="todayButton"
+            class="text-button hidden"
+            type="button"
+          >
+            Hoje
+          </button>
+
+          <button
+            id="archiveButton"
+            class="text-button"
+            type="button"
+          >
+            Páginas
+          </button>
+
+          <button id="themeButton" type="button">
+            Modo escuro
+          </button>
+        </div>
       </header>
 
       <article class="paper">
@@ -30,7 +67,11 @@
             O que ainda não encontrou palavras?
           </p>
 
-          <button id="newQuestionButton" class="question-button" type="button">
+          <button
+            id="newQuestionButton"
+            class="question-button"
+            type="button"
+          >
             outra pergunta
           </button>
         </div>
@@ -38,11 +79,55 @@
         <textarea
           id="entry"
           placeholder="Escreva aqui, sem pressa..."
+          aria-label="Página de escrita"
         ></textarea>
 
-        <p id="saveStatus" class="save-status">Guardado neste navegador.</p>
+        <p id="saveStatus" class="save-status">
+          Guardado neste navegador.
+        </p>
       </article>
+
     </section>
+
+    <!-- Área de páginas anteriores -->
+    <section
+      id="archiveArea"
+      class="archive-area hidden"
+      aria-labelledby="archiveTitle"
+    >
+      <div class="archive-panel">
+
+        <header class="archive-header">
+          <button
+            id="backToWritingButton"
+            class="text-button"
+            type="button"
+          >
+            Voltar
+          </button>
+
+          <h1 id="archiveTitle">Páginas</h1>
+        </header>
+
+        <p class="archive-description">
+          Palavras guardadas em outros dias.
+        </p>
+
+        <div
+          id="entriesList"
+          class="entries-list"
+        ></div>
+
+        <p
+          id="emptyArchive"
+          class="empty-archive hidden"
+        >
+          Ainda não há outras páginas guardadas.
+        </p>
+
+      </div>
+    </section>
+
   </main>
 
   <script src="script.js"></script>
