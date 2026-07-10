@@ -358,7 +358,6 @@ textarea::placeholder {
     margin-top: 1.25rem;
     line-height: 1.5;
   }
-}
 
 .topbar {
   flex-wrap: wrap;
@@ -405,6 +404,7 @@ textarea::placeholder {
   min-height: 72px;
   padding: 1rem 0;
 }
+}
 
 @media (max-width: 390px) {
   .writing-area {
@@ -429,7 +429,6 @@ textarea::placeholder {
   .question {
     font-size: 0.95rem;
   }
-}
 
 .archive-area {
   padding-left: 0.5rem;
@@ -444,6 +443,7 @@ textarea::placeholder {
 .topbar-actions {
   width: 100%;
   justify-content: flex-end;
+}
 }
 
 .hidden {
