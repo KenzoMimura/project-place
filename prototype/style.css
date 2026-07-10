@@ -114,6 +114,26 @@ button:disabled:hover {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
 }
 
+.writing-title {
+  width: 100%;
+  margin: 0 0 2.5rem;
+  padding: 0;
+
+  background: transparent;
+  border: none;
+  outline: none;
+
+  color: var(--text);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.55rem;
+  line-height: 1.4;
+}
+
+.writing-title::placeholder {
+  color: var(--muted);
+  opacity: 0.65;
+}
+
 .question-area {
   margin-bottom: 2rem;
 }
@@ -280,6 +300,18 @@ textarea::placeholder {
   font-size: 0.78rem;
 }
 
+.entry-title {
+  min-width: 0;
+
+  color: var(--text);
+  font-size: 1.05rem;
+  line-height: 1.4;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .entry-preview {
   display: block;
 
@@ -362,6 +394,11 @@ textarea::placeholder {
 
   .question-area {
     margin-bottom: 1.5rem;
+  }
+
+  .writing-title {
+    margin-bottom: 1.75rem;
+    font-size: 1.3rem;
   }
 
   .question {
@@ -465,6 +502,10 @@ textarea::placeholder {
 
   .question {
     font-size: 0.95rem;
+  }
+
+  .writing-title {
+    font-size: 1.2rem;
   }
 
 .archive-area {
