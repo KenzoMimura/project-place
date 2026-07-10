@@ -1,5 +1,9 @@
 Projeto iniciado em: 05 de julho de 2026
 
+# Link do prototipo
+
+https://kenzomimura.github.io/project-place/prototype/
+
 # Project Place
 
 A quiet place for personal writing, self-reflection, and thoughts still finding their words.
