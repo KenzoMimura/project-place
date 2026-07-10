@@ -31,10 +31,12 @@ body {
 }
 
 .container {
+  width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
 
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -157,6 +159,111 @@ textarea::placeholder {
   margin-bottom: 2rem;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.text-button {
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem;
+  color: var(--muted);
+}
+
+.text-button:hover {
+  color: var(--accent);
+}
+
+.archive-area {
+  width: 100%;
+  max-width: 850px;
+  padding: 2rem;
+}
+
+.archive-panel {
+  min-height: 70vh;
+  padding: 3rem 4rem;
+
+  background: var(--paper);
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+.archive-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.archive-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: normal;
+}
+
+.archive-description {
+  margin: 1rem 0 2.5rem;
+  color: var(--muted);
+}
+
+.entries-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.entry-card {
+  width: 100%;
+  padding: 1.25rem 0;
+
+  display: block;
+  text-align: left;
+
+  border: none;
+  border-bottom: 1px solid color-mix(
+    in srgb,
+    var(--muted) 25%,
+    transparent
+  );
+  border-radius: 0;
+
+  background: transparent;
+}
+
+.entry-card:first-child {
+  border-top: 1px solid color-mix(
+    in srgb,
+    var(--muted) 25%,
+    transparent
+  );
+}
+
+.entry-date {
+  display: block;
+  margin-bottom: 0.45rem;
+
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.entry-preview {
+  display: block;
+
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.empty-archive {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 @media (max-width: 720px) {
   body {
     overflow-x: hidden;
@@ -253,6 +360,52 @@ textarea::placeholder {
   }
 }
 
+.topbar {
+  flex-wrap: wrap;
+}
+
+.topbar-actions {
+  gap: 0.2rem;
+}
+
+.topbar-actions button {
+  min-height: 44px;
+}
+
+.archive-area {
+  width: 100%;
+  max-width: none;
+
+  padding:
+    max(0.75rem, env(safe-area-inset-top))
+    max(0.7rem, env(safe-area-inset-right))
+    max(0.9rem, env(safe-area-inset-bottom))
+    max(0.7rem, env(safe-area-inset-left));
+}
+
+.archive-panel {
+  min-height: calc(100dvh - 1.5rem);
+  padding: 2rem 1.3rem;
+  border-radius: 12px;
+}
+
+.archive-header {
+  gap: 1rem;
+}
+
+.archive-header h1 {
+  font-size: 1.3rem;
+}
+
+.archive-description {
+  margin-bottom: 2rem;
+}
+
+.entry-card {
+  min-height: 72px;
+  padding: 1rem 0;
+}
+
 @media (max-width: 390px) {
   .writing-area {
     padding-left: 0.55rem;
@@ -276,6 +429,21 @@ textarea::placeholder {
   .question {
     font-size: 0.95rem;
   }
+}
+
+.archive-area {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.archive-panel {
+  padding: 1.6rem 1rem;
+  border-radius: 10px;
+}
+
+.topbar-actions {
+  width: 100%;
+  justify-content: flex-end;
 }
 
 .hidden {
