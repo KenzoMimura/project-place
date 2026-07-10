@@ -33,6 +33,7 @@ const writingArea = document.getElementById("writingArea");
 const archiveArea = document.getElementById("archiveArea");
 
 const entry = document.getElementById("entry");
+const writingTitle = document.getElementById("writingTitle");
 const question = document.getElementById("question");
 const newQuestionButton = document.getElementById("newQuestionButton");
 
@@ -205,7 +206,7 @@ function saveCurrentWriting() {
 
     currentWritingId = null;
     currentCreatedOn = getTodayKey();
-    dateText.textContent = "Nova escrita";
+    dateText.textContent = formatDate(currentCreatedOn);
     isDirty = false;
     updateFinishButton();
 
@@ -215,6 +216,7 @@ function saveCurrentWriting() {
   const existingWriting = writings[existingIndex];
   const savedWriting = {
     id: existingWriting?.id ?? createWritingId(),
+    title: writingTitle.value.trim(),
     text,
     question: currentQuestion,
     status: existingWriting?.status ?? "draft",
@@ -265,8 +267,9 @@ function openNewWriting(shouldFocus = false) {
   currentQuestion = getRandomQuestion();
 
   entry.value = "";
+  writingTitle.value = "";
   question.textContent = currentQuestion;
-  dateText.textContent = "Nova escrita";
+  dateText.textContent = formatDate(currentCreatedOn);
   saveStatus.textContent = "Nada guardado ainda.";
 
   updateFinishButton();
@@ -291,6 +294,7 @@ function openWriting(writingId, shouldFocus = false) {
   currentQuestion = savedWriting.question ?? getRandomQuestion();
 
   entry.value = savedWriting.text;
+  writingTitle.value = savedWriting.title ?? "";
   question.textContent = currentQuestion;
   dateText.textContent = formatDate(savedWriting.createdOn);
   saveStatus.textContent = getSavedStatus(savedWriting);
@@ -335,11 +339,16 @@ function renderArchive() {
     const metaElement = document.createElement("span");
     metaElement.className = "entry-meta";
 
-    const dateElement = document.createElement("span");
-    dateElement.className = "entry-date";
-    dateElement.textContent = formatDate(savedWriting.createdOn);
+    const hasTitle = Boolean(savedWriting.title?.trim());
+    const identifierElement = document.createElement("span");
+    identifierElement.className = hasTitle
+      ? "entry-title"
+      : "entry-date";
+    identifierElement.textContent = hasTitle
+      ? savedWriting.title
+      : formatDate(savedWriting.createdOn);
 
-    metaElement.appendChild(dateElement);
+    metaElement.appendChild(identifierElement);
 
     if (savedWriting.status === "draft") {
       const statusElement = document.createElement("span");
@@ -352,7 +361,8 @@ function renderArchive() {
     previewElement.className = "entry-preview";
     previewElement.textContent = createPreview(savedWriting.text);
 
-    entryButton.append(metaElement, previewElement);
+    entryButton.appendChild(metaElement);
+    entryButton.appendChild(previewElement);
 
     entryButton.addEventListener("click", () => {
       openWriting(savedWriting.id, true);
@@ -421,6 +431,7 @@ function migrateLegacyData() {
 
       return {
         id: createWritingId(),
+        title: "",
         text: savedEntry.text,
         question: savedEntry.question ?? questions[0],
         status: isToday ? "draft" : "completed",
@@ -443,6 +454,7 @@ function migrateLegacyData() {
 
     migratedWritings.push({
       id: createWritingId(),
+      title: "",
       text: legacyText,
       question: questions[0],
       status: "draft",
@@ -467,15 +479,9 @@ function applySavedTheme() {
   }
 }
 
-beginButton.addEventListener("click", () => {
-  openNewWriting(true);
-});
-
-entry.addEventListener("input", () => {
+function scheduleSave() {
   isDirty = true;
-
   saveStatus.textContent = "Guardando...";
-  updateFinishButton();
 
   clearTimeout(saveTimeout);
 
@@ -486,6 +492,19 @@ entry.addEventListener("input", () => {
       ? getSavedStatus(savedWriting)
       : "Nada guardado ainda.";
   }, 1200);
+}
+
+beginButton.addEventListener("click", () => {
+  openNewWriting(true);
+});
+
+entry.addEventListener("input", () => {
+  updateFinishButton();
+  scheduleSave();
+});
+
+writingTitle.addEventListener("input", () => {
+  scheduleSave();
 });
 
 newQuestionButton.addEventListener("click", () => {
