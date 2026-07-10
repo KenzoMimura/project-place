@@ -1,4 +1,5 @@
-const STORAGE_KEY = "nimsayEntries";
+const STORAGE_KEY = "nimsayWritings";
+const DATED_ENTRIES_KEY = "nimsayEntries";
 const LEGACY_ENTRY_KEY = "entry";
 const THEME_KEY = "theme";
 
@@ -43,12 +44,17 @@ const archiveButton = document.getElementById("archiveButton");
 const backToWritingButton = document.getElementById(
   "backToWritingButton"
 );
-const todayButton = document.getElementById("todayButton");
+const newWritingButton = document.getElementById("newWritingButton");
+const archiveNewWritingButton = document.getElementById(
+  "archiveNewWritingButton"
+);
+const finishButton = document.getElementById("finishButton");
 
 const entriesList = document.getElementById("entriesList");
 const emptyArchive = document.getElementById("emptyArchive");
 
-let selectedDateKey = getTodayKey();
+let currentWritingId = null;
+let currentCreatedOn = getTodayKey();
 let currentQuestion = "";
 let saveTimeout;
 let isDirty = false;
@@ -86,13 +92,287 @@ function formatDate(dateKey) {
 }
 
 /*
-  Lê todas as páginas do localStorage.
+  Lê todas as escritas independentes do localStorage.
 
-  Se os dados estiverem corrompidos ou ainda não existirem,
-  devolvemos um objeto vazio para o site continuar funcionando.
+  Agora usamos um array porque a data deixou de ser o identificador.
+  Cada escrita possui seu próprio id e pode compartilhar a mesma data
+  de criação com outras escritas.
 */
-function loadEntries() {
-  const savedEntries = localStorage.getItem(STORAGE_KEY);
+function loadWritings() {
+  const savedWritings = localStorage.getItem(STORAGE_KEY);
+
+  if (!savedWritings) {
+    return [];
+  }
+
+  try {
+    const parsedWritings = JSON.parse(savedWritings);
+
+    if (Array.isArray(parsedWritings)) {
+      return parsedWritings;
+    }
+
+    return [];
+  } catch (error) {
+    console.error("Não foi possível carregar as páginas:", error);
+    return [];
+  }
+}
+
+function storeWritings(writings) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(writings));
+}
+
+function createWritingId() {
+  if (typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `writing-${Date.now()}-${Math.random()
+    .toString(16)
+    .slice(2)}`;
+}
+
+function getCurrentWriting(writings = loadWritings()) {
+  return writings.find(
+    (writing) => writing.id === currentWritingId
+  );
+}
+
+function getRandomQuestion(previousQuestion = "") {
+  if (questions.length === 1) {
+    return questions[0];
+  }
+
+  let selectedQuestion = previousQuestion;
+
+  while (selectedQuestion === previousQuestion) {
+    const randomIndex = Math.floor(Math.random() * questions.length);
+    selectedQuestion = questions[randomIndex];
+  }
+
+  return selectedQuestion;
+}
+
+function getSavedStatus(writing) {
+  if (writing?.status === "completed") {
+    return "Guardado neste navegador. Escrita finalizada.";
+  }
+
+  return "Guardado neste navegador.";
+}
+
+function updateFinishButton(writing = getCurrentWriting()) {
+  const isCompleted = writing?.status === "completed";
+  const hasText = Boolean(entry.value.trim());
+
+  finishButton.textContent = isCompleted
+    ? "Finalizada"
+    : "Finalizar";
+
+  finishButton.disabled = !hasText || isCompleted;
+}
+
+function showWritingArea(shouldFocus = false) {
+  welcome.classList.add("hidden");
+  archiveArea.classList.add("hidden");
+  writingArea.classList.remove("hidden");
+
+  if (shouldFocus) {
+    entry.focus();
+  }
+}
+
+/*
+  Salva a escrita atualmente aberta.
+
+  Um id é criado somente quando existe texto de verdade. Assim,
+  abrir uma nova escrita e sair sem digitar não cria rascunhos vazios.
+*/
+function saveCurrentWriting() {
+  const writings = loadWritings();
+  const text = entry.value;
+  const now = new Date().toISOString();
+  const existingIndex = writings.findIndex(
+    (writing) => writing.id === currentWritingId
+  );
+
+  if (!text.trim()) {
+    if (existingIndex >= 0) {
+      writings.splice(existingIndex, 1);
+      storeWritings(writings);
+    }
+
+    currentWritingId = null;
+    currentCreatedOn = getTodayKey();
+    dateText.textContent = "Nova escrita";
+    isDirty = false;
+    updateFinishButton();
+
+    return null;
+  }
+
+  const existingWriting = writings[existingIndex];
+  const savedWriting = {
+    id: existingWriting?.id ?? createWritingId(),
+    text,
+    question: currentQuestion,
+    status: existingWriting?.status ?? "draft",
+    createdOn: existingWriting?.createdOn ?? currentCreatedOn,
+    createdAt: existingWriting?.createdAt ?? now,
+    updatedAt: now,
+    completedAt: existingWriting?.completedAt ?? null
+  };
+
+  if (existingIndex >= 0) {
+    writings[existingIndex] = savedWriting;
+  } else {
+    writings.push(savedWriting);
+  }
+
+  storeWritings(writings);
+
+  currentWritingId = savedWriting.id;
+  currentCreatedOn = savedWriting.createdOn;
+  dateText.textContent = formatDate(savedWriting.createdOn);
+  isDirty = false;
+  updateFinishButton(savedWriting);
+
+  return savedWriting;
+}
+
+function flushPendingSave() {
+  clearTimeout(saveTimeout);
+
+  if (!isDirty) {
+    return getCurrentWriting();
+  }
+
+  const savedWriting = saveCurrentWriting();
+
+  saveStatus.textContent = savedWriting
+    ? getSavedStatus(savedWriting)
+    : "Nada guardado ainda.";
+
+  return savedWriting;
+}
+
+function openNewWriting(shouldFocus = false) {
+  flushPendingSave();
+
+  currentWritingId = null;
+  currentCreatedOn = getTodayKey();
+  currentQuestion = getRandomQuestion();
+
+  entry.value = "";
+  question.textContent = currentQuestion;
+  dateText.textContent = "Nova escrita";
+  saveStatus.textContent = "Nada guardado ainda.";
+
+  updateFinishButton();
+  showWritingArea(shouldFocus);
+}
+
+function openWriting(writingId, shouldFocus = false) {
+  flushPendingSave();
+
+  const writings = loadWritings();
+  const savedWriting = writings.find(
+    (writing) => writing.id === writingId
+  );
+
+  if (!savedWriting) {
+    openNewWriting(shouldFocus);
+    return;
+  }
+
+  currentWritingId = savedWriting.id;
+  currentCreatedOn = savedWriting.createdOn;
+  currentQuestion = savedWriting.question ?? getRandomQuestion();
+
+  entry.value = savedWriting.text;
+  question.textContent = currentQuestion;
+  dateText.textContent = formatDate(savedWriting.createdOn);
+  saveStatus.textContent = getSavedStatus(savedWriting);
+
+  updateFinishButton(savedWriting);
+  showWritingArea(shouldFocus);
+}
+
+function createPreview(text) {
+  const normalizedText = text
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (normalizedText.length <= 100) {
+    return normalizedText;
+  }
+
+  return `${normalizedText.slice(0, 100)}…`;
+}
+
+function renderArchive() {
+  const savedWritings = loadWritings()
+    .filter((writing) => writing.text?.trim())
+    .sort((firstWriting, secondWriting) =>
+      secondWriting.createdAt.localeCompare(
+        firstWriting.createdAt
+      )
+    );
+
+  entriesList.replaceChildren();
+
+  emptyArchive.classList.toggle(
+    "hidden",
+    savedWritings.length > 0
+  );
+
+  savedWritings.forEach((savedWriting) => {
+    const entryButton = document.createElement("button");
+    entryButton.className = "entry-card";
+    entryButton.type = "button";
+
+    const metaElement = document.createElement("span");
+    metaElement.className = "entry-meta";
+
+    const dateElement = document.createElement("span");
+    dateElement.className = "entry-date";
+    dateElement.textContent = formatDate(savedWriting.createdOn);
+
+    metaElement.appendChild(dateElement);
+
+    if (savedWriting.status === "draft") {
+      const statusElement = document.createElement("span");
+      statusElement.className = "entry-status";
+      statusElement.textContent = "Rascunho";
+      metaElement.appendChild(statusElement);
+    }
+
+    const previewElement = document.createElement("span");
+    previewElement.className = "entry-preview";
+    previewElement.textContent = createPreview(savedWriting.text);
+
+    entryButton.append(metaElement, previewElement);
+
+    entryButton.addEventListener("click", () => {
+      openWriting(savedWriting.id, true);
+    });
+
+    entriesList.appendChild(entryButton);
+  });
+}
+
+function openArchive() {
+  flushPendingSave();
+  renderArchive();
+
+  welcome.classList.add("hidden");
+  writingArea.classList.add("hidden");
+  archiveArea.classList.remove("hidden");
+}
+
+function loadDatedEntries() {
+  const savedEntries = localStorage.getItem(DATED_ENTRIES_KEY);
 
   if (!savedEntries) {
     return {};
@@ -111,206 +391,70 @@ function loadEntries() {
 
     return {};
   } catch (error) {
-    console.error("Não foi possível carregar as páginas:", error);
+    console.error("Não foi possível migrar as páginas:", error);
     return {};
   }
 }
 
-function storeEntries(entries) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-}
-
-function getRandomQuestion(previousQuestion = "") {
-  if (questions.length === 1) {
-    return questions[0];
-  }
-
-  let selectedQuestion = previousQuestion;
-
-  while (selectedQuestion === previousQuestion) {
-    const randomIndex = Math.floor(Math.random() * questions.length);
-    selectedQuestion = questions[randomIndex];
-  }
-
-  return selectedQuestion;
-}
-
 /*
-  Salva a página atualmente aberta.
+  Migra as duas versões anteriores do armazenamento:
 
-  Se o texto estiver completamente vazio, a página é removida.
-  Isso impede que o arquivo fique cheio de datas vazias.
+  - "entry": guardava somente um texto;
+  - "nimsayEntries": guardava uma página para cada data.
+
+  As chaves antigas só são removidas depois que o novo array é salvo.
 */
-function saveCurrentEntry() {
-  const entries = loadEntries();
-  const text = entry.value;
-  const now = new Date().toISOString();
-
-  if (!text.trim()) {
-    delete entries[selectedDateKey];
-    storeEntries(entries);
-
-    isDirty = false;
-    return false;
-  }
-
-  const existingEntry = entries[selectedDateKey];
-
-  entries[selectedDateKey] = {
-    text,
-    question: currentQuestion,
-    createdAt: existingEntry?.createdAt ?? now,
-    updatedAt: now
-  };
-
-  storeEntries(entries);
-
-  isDirty = false;
-  return true;
-}
-
-function flushPendingSave() {
-  clearTimeout(saveTimeout);
-
-  if (!isDirty) {
+function migrateLegacyData() {
+  if (localStorage.getItem(STORAGE_KEY) !== null) {
     return;
   }
 
-  const wasSaved = saveCurrentEntry();
-
-  saveStatus.textContent = wasSaved
-    ? "Guardado neste navegador."
-    : "Nada guardado ainda.";
-}
-
-/*
-  Abre a página correspondente a uma data.
-
-  Se ela já existir, carregamos o texto e a pergunta.
-  Caso contrário, criamos apenas uma experiência visual vazia;
-  nada será salvo até que a pessoa realmente escreva.
-*/
-function openEntry(dateKey, shouldFocus = false) {
-  flushPendingSave();
-
-  selectedDateKey = dateKey;
-
-  const entries = loadEntries();
-  const savedEntry = entries[dateKey];
-
-  entry.value = savedEntry?.text ?? "";
-
-  currentQuestion =
-    savedEntry?.question ?? getRandomQuestion();
-
-  question.textContent = currentQuestion;
-  dateText.textContent = formatDate(dateKey);
-
-  saveStatus.textContent = savedEntry
-    ? "Guardado neste navegador."
-    : "Nada guardado ainda.";
-
-  const isToday = dateKey === getTodayKey();
-  todayButton.classList.toggle("hidden", isToday);
-
-  welcome.classList.add("hidden");
-  archiveArea.classList.add("hidden");
-  writingArea.classList.remove("hidden");
-
-  if (shouldFocus) {
-    entry.focus();
-  }
-}
-
-function createPreview(text) {
-  const normalizedText = text
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (normalizedText.length <= 100) {
-    return normalizedText;
-  }
-
-  return `${normalizedText.slice(0, 100)}…`;
-}
-
-function renderArchive() {
-  const entries = loadEntries();
-
-  const savedEntries = Object.entries(entries)
+  const todayKey = getTodayKey();
+  const datedEntries = loadDatedEntries();
+  const migratedWritings = Object.entries(datedEntries)
     .filter(([, savedEntry]) => savedEntry.text?.trim())
-    .sort(([firstDate], [secondDate]) =>
-      secondDate.localeCompare(firstDate)
-    );
+    .map(([dateKey, savedEntry]) => {
+      const fallbackDate = new Date(
+        `${dateKey}T12:00:00`
+      ).toISOString();
+      const isToday = dateKey === todayKey;
 
-  entriesList.replaceChildren();
-
-  emptyArchive.classList.toggle(
-    "hidden",
-    savedEntries.length > 0
-  );
-
-  savedEntries.forEach(([dateKey, savedEntry]) => {
-    const entryButton = document.createElement("button");
-    entryButton.className = "entry-card";
-    entryButton.type = "button";
-
-    const dateElement = document.createElement("span");
-    dateElement.className = "entry-date";
-    dateElement.textContent = formatDate(dateKey);
-
-    const previewElement = document.createElement("span");
-    previewElement.className = "entry-preview";
-    previewElement.textContent = createPreview(savedEntry.text);
-
-    entryButton.append(dateElement, previewElement);
-
-    entryButton.addEventListener("click", () => {
-      openEntry(dateKey, true);
+      return {
+        id: createWritingId(),
+        text: savedEntry.text,
+        question: savedEntry.question ?? questions[0],
+        status: isToday ? "draft" : "completed",
+        createdOn: dateKey,
+        createdAt: savedEntry.createdAt ?? fallbackDate,
+        updatedAt: savedEntry.updatedAt ?? fallbackDate,
+        completedAt: isToday
+          ? null
+          : savedEntry.updatedAt ?? fallbackDate
+      };
     });
 
-    entriesList.appendChild(entryButton);
-  });
-}
-
-function openArchive() {
-  flushPendingSave();
-  renderArchive();
-
-  welcome.classList.add("hidden");
-  writingArea.classList.add("hidden");
-  archiveArea.classList.remove("hidden");
-}
-
-/*
-  Migra o texto salvo pela versão anterior do protótipo.
-
-  A versão antiga usava a chave "entry".
-  Se ela existir, o texto será transformado em uma página de hoje.
-*/
-function migrateLegacyEntry() {
   const legacyText = localStorage.getItem(LEGACY_ENTRY_KEY);
+  const legacyAlreadyMigrated = migratedWritings.some(
+    (writing) => writing.text === legacyText
+  );
 
-  if (!legacyText?.trim()) {
-    return;
-  }
-
-  const entries = loadEntries();
-  const todayKey = getTodayKey();
-
-  if (!entries[todayKey]) {
+  if (legacyText?.trim() && !legacyAlreadyMigrated) {
     const now = new Date().toISOString();
 
-    entries[todayKey] = {
+    migratedWritings.push({
+      id: createWritingId(),
       text: legacyText,
       question: questions[0],
+      status: "draft",
+      createdOn: todayKey,
       createdAt: now,
-      updatedAt: now
-    };
-
-    storeEntries(entries);
+      updatedAt: now,
+      completedAt: null
+    });
   }
 
+  storeWritings(migratedWritings);
+  localStorage.removeItem(DATED_ENTRIES_KEY);
   localStorage.removeItem(LEGACY_ENTRY_KEY);
 }
 
@@ -324,21 +468,22 @@ function applySavedTheme() {
 }
 
 beginButton.addEventListener("click", () => {
-  openEntry(getTodayKey(), true);
+  openNewWriting(true);
 });
 
 entry.addEventListener("input", () => {
   isDirty = true;
 
   saveStatus.textContent = "Guardando...";
+  updateFinishButton();
 
   clearTimeout(saveTimeout);
 
   saveTimeout = setTimeout(() => {
-    const wasSaved = saveCurrentEntry();
+    const savedWriting = saveCurrentWriting();
 
-    saveStatus.textContent = wasSaved
-      ? "Guardado neste navegador."
+    saveStatus.textContent = savedWriting
+      ? getSavedStatus(savedWriting)
       : "Nada guardado ainda.";
   }, 1200);
 });
@@ -351,12 +496,7 @@ newQuestionButton.addEventListener("click", () => {
     Se já houver texto ou uma página previamente salva,
     guardamos também a nova pergunta.
   */
-  const entries = loadEntries();
-
-  if (
-    entry.value.trim() ||
-    entries[selectedDateKey]
-  ) {
+  if (entry.value.trim() || getCurrentWriting()) {
     isDirty = true;
     flushPendingSave();
   }
@@ -367,11 +507,57 @@ archiveButton.addEventListener("click", () => {
 });
 
 backToWritingButton.addEventListener("click", () => {
-  openEntry(selectedDateKey);
+  const currentWriting = getCurrentWriting();
+
+  if (currentWriting) {
+    openWriting(currentWriting.id);
+    return;
+  }
+
+  openNewWriting();
 });
 
-todayButton.addEventListener("click", () => {
-  openEntry(getTodayKey(), true);
+newWritingButton.addEventListener("click", () => {
+  openNewWriting(true);
+});
+
+archiveNewWritingButton.addEventListener("click", () => {
+  openNewWriting(true);
+});
+
+finishButton.addEventListener("click", () => {
+  const savedWriting = flushPendingSave();
+
+  if (!savedWriting) {
+    saveStatus.textContent =
+      "Escreva algo antes de finalizar.";
+    updateFinishButton();
+    return;
+  }
+
+  const writings = loadWritings();
+  const writingIndex = writings.findIndex(
+    (writing) => writing.id === savedWriting.id
+  );
+
+  if (writingIndex < 0) {
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const completedWriting = {
+    ...writings[writingIndex],
+    status: "completed",
+    updatedAt: now,
+    completedAt: now
+  };
+
+  writings[writingIndex] = completedWriting;
+  storeWritings(writings);
+
+  saveStatus.textContent =
+    "Escrita finalizada e guardada neste navegador.";
+  updateFinishButton(completedWriting);
 });
 
 themeButton.addEventListener("click", () => {
@@ -397,5 +583,5 @@ window.addEventListener("beforeunload", () => {
   flushPendingSave();
 });
 
-migrateLegacyEntry();
+migrateLegacyData();
 applySavedTheme();

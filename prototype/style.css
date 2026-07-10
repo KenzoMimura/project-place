@@ -79,6 +79,16 @@ button:hover {
   color: var(--accent);
 }
 
+button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+button:disabled:hover {
+  border-color: var(--muted);
+  color: var(--text);
+}
+
 /* Área de escrita */
 
 .writing-area {
@@ -149,7 +159,16 @@ textarea::placeholder {
 .save-status {
   color: var(--muted);
   font-size: 0.85rem;
+  margin: 0;
+}
+
+.writing-footer {
   margin-top: 1rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .brand {
@@ -203,6 +222,10 @@ textarea::placeholder {
   font-weight: normal;
 }
 
+.archive-new-writing {
+  margin-left: auto;
+}
+
 .archive-description {
   margin: 1rem 0 2.5rem;
   color: var(--muted);
@@ -239,12 +262,22 @@ textarea::placeholder {
   );
 }
 
-.entry-date {
-  display: block;
+.entry-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 0.45rem;
+}
 
+.entry-date {
   color: var(--text);
   font-size: 1rem;
+}
+
+.entry-status {
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
 .entry-preview {
@@ -355,8 +388,11 @@ textarea::placeholder {
   }
 
   .save-status {
-    margin-top: 1.25rem;
     line-height: 1.5;
+  }
+
+  .writing-footer {
+    margin-top: 1.25rem;
   }
 
 .topbar {
@@ -390,6 +426,7 @@ textarea::placeholder {
 
 .archive-header {
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .archive-header h1 {

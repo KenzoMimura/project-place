@@ -40,11 +40,11 @@
 
         <div class="topbar-actions">
           <button
-            id="todayButton"
-            class="text-button hidden"
+            id="newWritingButton"
+            class="text-button"
             type="button"
           >
-            Hoje
+            Nova escrita
           </button>
 
           <button
@@ -82,9 +82,20 @@
           aria-label="Página de escrita"
         ></textarea>
 
-        <p id="saveStatus" class="save-status">
-          Guardado neste navegador.
-        </p>
+        <div class="writing-footer">
+          <p id="saveStatus" class="save-status">
+            Nada guardado ainda.
+          </p>
+
+          <button
+            id="finishButton"
+            class="text-button"
+            type="button"
+            disabled
+          >
+            Finalizar
+          </button>
+        </div>
       </article>
 
     </section>
@@ -107,10 +118,18 @@
           </button>
 
           <h1 id="archiveTitle">Páginas</h1>
+
+          <button
+            id="archiveNewWritingButton"
+            class="text-button archive-new-writing"
+            type="button"
+          >
+            Nova escrita
+          </button>
         </header>
 
         <p class="archive-description">
-          Palavras guardadas em outros dias.
+          Palavras guardadas em outros momentos.
         </p>
 
         <div
@@ -122,7 +141,7 @@
           id="emptyArchive"
           class="empty-archive hidden"
         >
-          Ainda não há outras páginas guardadas.
+          Ainda não há páginas guardadas.
         </p>
 
       </div>
