@@ -256,30 +256,58 @@ textarea::placeholder {
   flex-direction: column;
 }
 
+.entry-row {
+  display: flex;
+  align-items: stretch;
+
+  border-bottom: 1px solid color-mix(
+    in srgb,
+    var(--muted) 25%,
+    transparent
+  );
+}
+
+.entry-row:first-child {
+  border-top: 1px solid color-mix(
+    in srgb,
+    var(--muted) 25%,
+    transparent
+  );
+}
+
 .entry-card {
-  width: 100%;
+  width: auto;
+  min-width: 0;
+  flex: 1;
   padding: 1.25rem 0;
 
   display: block;
   text-align: left;
 
   border: none;
-  border-bottom: 1px solid color-mix(
-    in srgb,
-    var(--muted) 25%,
-    transparent
-  );
   border-radius: 0;
 
   background: transparent;
 }
 
-.entry-card:first-child {
-  border-top: 1px solid color-mix(
-    in srgb,
-    var(--muted) 25%,
-    transparent
-  );
+.download-button {
+  width: 48px;
+  min-width: 48px;
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 0;
+  color: var(--muted);
+  font-size: 1.15rem;
+}
+
+.download-button:hover {
+  border: none;
+  color: var(--accent);
 }
 
 .entry-meta {
