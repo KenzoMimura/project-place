@@ -315,6 +315,10 @@ function createPreview(text) {
   return `${normalizedText.slice(0, 100)}…`;
 }
 
+function getWritingIdentifier(writing) {
+  return writing.title?.trim() || formatDate(writing.createdOn);
+}
+
 function renderArchive() {
   const savedWritings = loadWritings()
     .filter((writing) => writing.text?.trim())
@@ -332,6 +336,9 @@ function renderArchive() {
   );
 
   savedWritings.forEach((savedWriting) => {
+    const entryRow = document.createElement("div");
+    entryRow.className = "entry-row";
+
     const entryButton = document.createElement("button");
     entryButton.className = "entry-card";
     entryButton.type = "button";
@@ -344,9 +351,7 @@ function renderArchive() {
     identifierElement.className = hasTitle
       ? "entry-title"
       : "entry-date";
-    identifierElement.textContent = hasTitle
-      ? savedWriting.title
-      : formatDate(savedWriting.createdOn);
+    identifierElement.textContent = getWritingIdentifier(savedWriting);
 
     metaElement.appendChild(identifierElement);
 
@@ -368,7 +373,26 @@ function renderArchive() {
       openWriting(savedWriting.id, true);
     });
 
-    entriesList.appendChild(entryButton);
+    const downloadButton = document.createElement("button");
+    downloadButton.className = "download-button";
+    downloadButton.type = "button";
+    downloadButton.textContent = "↓";
+    downloadButton.title = "Baixar em PDF";
+    downloadButton.setAttribute(
+      "aria-label",
+      `Baixar ${getWritingIdentifier(savedWriting)} em PDF`
+    );
+
+    downloadButton.addEventListener("click", () => {
+      try {
+        window.NimsayPdf.downloadWritingPdf(savedWriting);
+      } catch (error) {
+        console.error("Não foi possível criar o PDF:", error);
+      }
+    });
+
+    entryRow.append(entryButton, downloadButton);
+    entriesList.appendChild(entryRow);
   });
 }
 
