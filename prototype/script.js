@@ -34,6 +34,7 @@ const archiveArea = document.getElementById("archiveArea");
 
 const entry = document.getElementById("entry");
 const writingTitle = document.getElementById("writingTitle");
+const writingNotice = document.getElementById("writingNotice");
 const question = document.getElementById("question");
 const newQuestionButton = document.getElementById("newQuestionButton");
 
@@ -59,6 +60,8 @@ let currentCreatedOn = getTodayKey();
 let currentQuestion = "";
 let saveTimeout;
 let isDirty = false;
+let viewTransitionTimeout;
+let writingNoticeTimeout;
 
 /*
   Retorna a data local no formato YYYY-MM-DD.
@@ -174,14 +177,68 @@ function updateFinishButton(writing = getCurrentWriting()) {
   finishButton.disabled = !hasText || isCompleted;
 }
 
-function showWritingArea(shouldFocus = false) {
-  welcome.classList.add("hidden");
-  archiveArea.classList.add("hidden");
-  writingArea.classList.remove("hidden");
+function showView(nextView, focusTarget = null) {
+  const views = [welcome, writingArea, archiveArea];
+  const currentView = views.find(
+    (view) => !view.classList.contains("hidden")
+  );
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
 
-  if (shouldFocus) {
-    entry.focus();
+  clearTimeout(viewTransitionTimeout);
+  views.forEach((view) => {
+    view.classList.remove("view-entering", "view-leaving");
+  });
+
+  function revealNextView() {
+    views.forEach((view) => {
+      view.classList.toggle("hidden", view !== nextView);
+    });
+
+    if (!prefersReducedMotion) {
+      nextView.classList.add("view-entering");
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          nextView.classList.remove("view-entering");
+        });
+      });
+    }
+
+    if (focusTarget) {
+      viewTransitionTimeout = setTimeout(
+        () => focusTarget.focus(),
+        prefersReducedMotion ? 0 : 220
+      );
+    }
   }
+
+  if (
+    !currentView ||
+    currentView === nextView ||
+    prefersReducedMotion
+  ) {
+    revealNextView();
+    return;
+  }
+
+  currentView.classList.add("view-leaving");
+  viewTransitionTimeout = setTimeout(revealNextView, 180);
+}
+
+function showWritingArea(shouldFocus = false) {
+  showView(writingArea, shouldFocus ? entry : null);
+}
+
+function showWritingNotice(message) {
+  clearTimeout(writingNoticeTimeout);
+  writingNotice.textContent = message;
+  writingNotice.classList.add("visible");
+
+  writingNoticeTimeout = setTimeout(() => {
+    writingNotice.classList.remove("visible");
+  }, 1800);
 }
 
 /*
@@ -274,6 +331,7 @@ function openNewWriting(shouldFocus = false) {
 
   updateFinishButton();
   showWritingArea(shouldFocus);
+  showWritingNotice("Nova escrita");
 }
 
 function openWriting(writingId, shouldFocus = false) {
@@ -399,10 +457,7 @@ function renderArchive() {
 function openArchive() {
   flushPendingSave();
   renderArchive();
-
-  welcome.classList.add("hidden");
-  writingArea.classList.add("hidden");
-  archiveArea.classList.remove("hidden");
+  showView(archiveArea);
 }
 
 function loadDatedEntries() {
