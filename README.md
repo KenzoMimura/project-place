@@ -18,7 +18,8 @@ O objetivo não é criar mais uma rede social, app de notas ou ferramenta de pro
 
 Em desenvolvimento.
 
-Atualmente o projeto está em fase de manifesto, documentação e protótipo inicial.
+Atualmente o projeto possui um protótipo funcional publicado, com foco em
+validar a experiência de escrita privada e sem distrações.
 
 ## Tecnologias usadas no protótipo
 
@@ -34,13 +35,19 @@ Atualmente o projeto está em fase de manifesto, documentação e protótipo ini
 - Página de escrita
 - Modo claro e escuro
 - Salvamento local no navegador
+- Escritas independentes, com título opcional
+- Perguntas aleatórias para ajudar a começar
+- Arquivo de páginas guardadas
+- Finalização de escritas
+- Exportação individual em PDF
 - Documentação do manifesto e princípios do produto
 
 ## Próximos passos
 
-- Melhorar a experiência de escrita
-- Adicionar perguntas aleatórias
-- Salvar entradas por data
-- Criar uma área de escritos antigos
-- Publicar o protótipo online
-- Futuramente migrar para Next.js
+- Validar a experiência com pessoas reais
+- Melhorar acessibilidade e navegação por teclado
+- Criar testes automatizados para os fluxos essenciais
+- Definir uma forma segura de importar e exportar todas as escritas
+- Revisar o comportamento de rascunhos e escritas finalizadas
+- Avaliar a migração para Next.js somente quando o protótipo exigir
+  uma arquitetura mais completa

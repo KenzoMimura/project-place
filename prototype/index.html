@@ -11,7 +11,7 @@
   <title>Nimsay</title>
 
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=7" />
 </head>
 
 <body>
@@ -36,7 +36,10 @@
     <section id="writingArea" class="writing-area hidden">
 
       <header class="topbar">
-        <span id="dateText"></span>
+        <div class="topbar-identity">
+          <span class="topbar-brand">Nimsay</span>
+          <span id="dateText"></span>
+        </div>
 
         <div class="topbar-actions">
           <button
@@ -62,6 +65,12 @@
       </header>
 
       <article class="paper">
+        <p
+          id="writingNotice"
+          class="writing-notice"
+          aria-live="polite"
+        ></p>
+
         <input
           id="writingTitle"
           class="writing-title"
@@ -80,8 +89,10 @@
             id="newQuestionButton"
             class="question-button"
             type="button"
+            aria-label="Mostrar outra pergunta"
+            title="Outra pergunta"
           >
-            outra pergunta
+            <span aria-hidden="true">↻</span>
           </button>
         </div>
 
@@ -159,6 +170,6 @@
   </main>
 
   <script src="pdf-export.js"></script>
-  <script src="script.js"></script>
+  <script src="script.js?v=3"></script>
 </body>
 </html>

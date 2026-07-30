@@ -4,6 +4,9 @@
   --text: #2d2b2a;
   --muted: #8a8178;
   --accent: #c8a977;
+  --accent-soft: rgba(200, 169, 119, 0.16);
+  --line: rgba(138, 129, 120, 0.2);
+  --paper-shadow: rgba(62, 51, 38, 0.09);
 }
 
 body.dark {
@@ -12,6 +15,9 @@ body.dark {
   --text: #ece8e1;
   --muted: #aaa197;
   --accent: #d8b97f;
+  --accent-soft: rgba(216, 185, 127, 0.12);
+  --line: rgba(170, 161, 151, 0.16);
+  --paper-shadow: rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -21,13 +27,30 @@ body.dark {
 body {
   margin: 0;
   font-family: Georgia, "Times New Roman", serif;
-  background: var(--background);
+  background:
+    radial-gradient(
+      circle at 50% 0,
+      color-mix(in srgb, var(--accent-soft) 70%, transparent),
+      transparent 34rem
+    ),
+    radial-gradient(
+      circle at 50% 100%,
+      color-mix(in srgb, var(--accent-soft) 38%, transparent),
+      transparent 30rem
+    ),
+    var(--background);
   color: var(--text);
 
   min-height: 100vh;
   min-height: 100dvh;
 
   -webkit-text-size-adjust: 100%;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--text);
 }
 
 .container {
@@ -39,22 +62,41 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow-x: clip;
 }
 
 /* Tela inicial */
 
 .welcome {
+  position: relative;
+  width: min(100%, 34rem);
   text-align: center;
-  padding: 2rem;
+  padding: 3rem;
+}
+
+.welcome::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(68vw, 390px);
+  aspect-ratio: 1;
+  z-index: -1;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.38;
 }
 
 .light-dot {
-  width: 12px;
-  height: 12px;
+  width: 9px;
+  height: 9px;
   background: var(--accent);
   border-radius: 50%;
-  margin: 0 auto 2rem;
-  box-shadow: 0 0 24px var(--accent);
+  margin: 0 auto 2.25rem;
+  box-shadow:
+    0 0 0 7px var(--accent-soft),
+    0 0 30px var(--accent);
 }
 
 .small-text {
@@ -71,12 +113,27 @@ button {
   border-radius: 999px;
   cursor: pointer;
   font-family: inherit;
-  transition: 0.2s ease;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 button:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: var(--accent-soft);
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 72%, transparent);
+  outline-offset: 4px;
+}
+
+textarea:focus-visible {
+  outline: none;
 }
 
 button:disabled {
@@ -107,11 +164,19 @@ button:disabled:hover {
 }
 
 .paper {
+  position: relative;
   background: var(--paper);
   min-height: 70vh;
   padding: 4rem;
-  border-radius: 8px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 22px 64px var(--paper-shadow);
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
 }
 
 .writing-title {
@@ -127,6 +192,15 @@ button:disabled:hover {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.55rem;
   line-height: 1.4;
+  border-bottom: 1px solid transparent;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.writing-title:focus-visible {
+  outline: none;
+  border-bottom-color: var(--line);
 }
 
 .writing-title::placeholder {
@@ -136,26 +210,44 @@ button:disabled:hover {
 
 .question-area {
   margin-bottom: 2rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .question {
+  flex: 1;
   color: var(--muted);
   font-size: 1.1rem;
-  margin-bottom: 0.75rem;
+  line-height: 1.55;
+  margin: 0;
 }
 
 .question-button {
-  border: none;
+  width: 2rem;
+  min-width: 2rem;
+  height: 2rem;
   padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid transparent;
   color: var(--muted);
-  font-size: 0.85rem;
-  opacity: 0.7;
-  border-radius: 0;
+  font-size: 1.15rem;
+  line-height: 1;
+  opacity: 0.65;
+  border-radius: 50%;
 }
 
 .question-button:hover {
   color: var(--accent);
+  border-color: var(--line);
+  background: var(--accent-soft);
   opacity: 1;
+  transform: rotate(24deg);
 }
 
 textarea {
@@ -169,6 +261,68 @@ textarea {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.25rem;
   line-height: 1.8;
+
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.25s ease;
+}
+
+.writing-notice {
+  position: absolute;
+  top: 1.25rem;
+  left: 50%;
+  margin: 0;
+  padding: 0.35rem 0.7rem;
+
+  color: var(--muted);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+
+  opacity: 0;
+  transform: translate(-50%, -4px);
+  pointer-events: none;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.writing-notice.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+textarea:hover,
+textarea:focus {
+  scrollbar-color:
+    color-mix(in srgb, var(--accent) 72%, transparent)
+    transparent;
+}
+
+textarea::-webkit-scrollbar {
+  width: 7px;
+}
+
+textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 999px;
+}
+
+textarea:hover::-webkit-scrollbar-thumb,
+textarea:focus::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent) 72%, transparent);
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }
 
 textarea::placeholder {
@@ -192,10 +346,55 @@ textarea::placeholder {
 }
 
 .brand {
-  font-size: 1.1rem;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-  margin-bottom: 2rem;
+  position: relative;
+  width: fit-content;
+  margin: 0 auto 2.1rem;
+  color: var(--text);
+  font-size: clamp(2.2rem, 7vw, 3.2rem);
+  font-weight: normal;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  text-indent: 0;
+  padding-left: 0.13em;
+  text-shadow: 0 10px 28px var(--accent-soft);
+}
+
+.brand::after {
+  content: "";
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  bottom: -0.85rem;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent),
+    transparent
+  );
+}
+
+.topbar-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.topbar-brand {
+  color: var(--text);
+  font-size: 1.05rem;
+  letter-spacing: 0.11em;
+}
+
+.topbar-brand::after {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin-left: 0.8rem;
+  vertical-align: middle;
+  background: var(--accent);
+  border-radius: 50%;
 }
 
 .topbar-actions {
@@ -213,6 +412,7 @@ textarea::placeholder {
 
 .text-button:hover {
   color: var(--accent);
+  background: transparent;
 }
 
 .archive-area {
@@ -226,8 +426,31 @@ textarea::placeholder {
   padding: 3rem 4rem;
 
   background: var(--paper);
-  border-radius: 8px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 22px 64px var(--paper-shadow);
+}
+
+.welcome,
+.writing-area,
+.archive-area {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease,
+    filter 0.22s ease;
+}
+
+.view-entering {
+  opacity: 0;
+  transform: translateY(8px);
+  filter: blur(2px);
+}
+
+.view-leaving {
+  opacity: 0;
+  transform: translateY(-6px);
+  filter: blur(1px);
+  pointer-events: none;
 }
 
 .archive-header {
@@ -288,6 +511,11 @@ textarea::placeholder {
   border-radius: 0;
 
   background: transparent;
+}
+
+.entry-card:hover {
+  background: transparent;
+  transform: translateX(4px);
 }
 
 .download-button {
@@ -388,6 +616,10 @@ textarea::placeholder {
       max(1.25rem, env(safe-area-inset-left));
   }
 
+  .welcome::before {
+    width: min(84vw, 360px);
+  }
+
   .writing-area {
     width: 100%;
     max-width: none;
@@ -404,6 +636,11 @@ textarea::placeholder {
     gap: 0.75rem;
     margin-bottom: 0.9rem;
     padding: 0 0.2rem;
+  }
+
+  .topbar-identity {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .topbar button {
@@ -432,17 +669,14 @@ textarea::placeholder {
   .question {
     font-size: 1rem;
     line-height: 1.55;
-    margin-bottom: 0.4rem;
   }
 
   .question-button {
-    min-height: 44px;
-    padding: 0.5rem 0;
-
-    display: inline-flex;
-    align-items: center;
-
-    font-size: 0.85rem;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    margin-top: -0.45rem;
+    font-size: 1.2rem;
   }
 
   textarea {
@@ -554,4 +788,13 @@ textarea::placeholder {
 
 .hidden {
   display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
