@@ -31,6 +31,7 @@ const welcome = document.getElementById("welcome");
 
 const writingArea = document.getElementById("writingArea");
 const archiveArea = document.getElementById("archiveArea");
+const ambientScene = document.getElementById("ambientScene");
 
 const entry = document.getElementById("entry");
 const writingTitle = document.getElementById("writingTitle");
@@ -62,6 +63,7 @@ let saveTimeout;
 let isDirty = false;
 let viewTransitionTimeout;
 let writingNoticeTimeout;
+let ambientTransitionTimeout;
 
 /*
   Retorna a data local no formato YYYY-MM-DD.
@@ -196,6 +198,15 @@ function showView(nextView, focusTarget = null) {
       view.classList.toggle("hidden", view !== nextView);
     });
 
+    if (nextView === writingArea) {
+      clearTimeout(ambientTransitionTimeout);
+      ambientScene.classList.remove("hidden");
+
+      requestAnimationFrame(() => {
+        ambientScene.classList.add("visible");
+      });
+    }
+
     if (!prefersReducedMotion) {
       nextView.classList.add("view-entering");
 
@@ -212,6 +223,14 @@ function showView(nextView, focusTarget = null) {
         prefersReducedMotion ? 0 : 220
       );
     }
+  }
+
+  if (nextView !== writingArea) {
+    ambientScene.classList.remove("visible");
+    clearTimeout(ambientTransitionTimeout);
+    ambientTransitionTimeout = setTimeout(() => {
+      ambientScene.classList.add("hidden");
+    }, prefersReducedMotion ? 0 : 280);
   }
 
   if (

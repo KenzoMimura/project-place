@@ -11,7 +11,7 @@
   <title>Nimsay</title>
 
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-  <link rel="stylesheet" href="style.css?v=7" />
+  <link rel="stylesheet" href="style.css?v=21" />
 </head>
 
 <body>
@@ -75,7 +75,7 @@
           id="writingTitle"
           class="writing-title"
           type="text"
-          placeholder="Um nome para esta escrita, se quiser..."
+          placeholder="Um nome, se quiser..."
           aria-label="Título da escrita"
           autocomplete="off"
         />
@@ -119,6 +119,261 @@
       </article>
 
     </section>
+
+    <div
+      id="ambientScene"
+      class="ambient-scene hidden"
+    >
+      <svg
+        class="ambient-backdrop"
+        viewBox="0 0 420 800"
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden="true"
+      >
+        <defs>
+          <filter
+            id="ambientGlow"
+            x="-80%"
+            y="-80%"
+            width="260%"
+            height="260%"
+          >
+            <feGaussianBlur stdDeviation="24" />
+          </filter>
+        </defs>
+
+        <path
+          class="ambient-line"
+          d="M22 91 C92 121 166 132 255 121"
+        />
+
+        <path
+          class="ambient-line ambient-line-soft"
+          d="M18 191 C118 252 224 301 388 338"
+        />
+
+        <path
+          class="ambient-lamp-stand"
+          d="M70 680 C72 548 96 405 184 311"
+        />
+
+        <path
+          class="ambient-shelf"
+          d="M24 430 H150"
+        />
+
+        <path
+          class="ambient-lamp-glow"
+          d="M167 316 C190 283 224 275 253 292 L270 327 C236 342 198 342 165 329 Z"
+        />
+
+        <path
+          class="ambient-lamp"
+          d="M167 316 C190 283 224 275 253 292 L270 327 C236 342 198 342 165 329 Z"
+        />
+
+        <path
+          class="ambient-accent"
+          d="M36 52 L61 84 M118 34 L143 73 M205 32 L216 77"
+        />
+
+        <path
+          class="ambient-floor"
+          d="M0 687 C128 669 287 671 420 692"
+        />
+
+        <ellipse
+          class="ambient-rug"
+          cx="216"
+          cy="718"
+          rx="154"
+          ry="31"
+        />
+      </svg>
+
+      <div
+        id="companion"
+        class="companion"
+        role="img"
+        aria-label="Um gato preto dorme por perto"
+      >
+        <svg
+          class="companion-cat"
+          viewBox="0 0 280 150"
+          aria-hidden="true"
+        >
+          <defs>
+            <filter
+              id="companionGlow"
+              x="-60%"
+              y="-60%"
+              width="220%"
+              height="220%"
+              color-interpolation-filters="sRGB"
+            >
+              <feGaussianBlur stdDeviation="9" />
+            </filter>
+
+            <linearGradient
+              id="companionLight"
+              x1="0"
+              y1="0"
+              x2="1"
+              y2="1"
+            >
+              <stop
+                class="companion-light-start"
+                offset="0"
+              />
+              <stop
+                class="companion-light-end"
+                offset="1"
+              />
+            </linearGradient>
+          </defs>
+
+          <ellipse
+            class="companion-backlight"
+            cx="144"
+            cy="91"
+            rx="112"
+            ry="45"
+          />
+
+          <ellipse
+            class="companion-light"
+            cx="141"
+            cy="130"
+            rx="132"
+            ry="17"
+          />
+
+          <ellipse
+            class="companion-shadow"
+            cx="145"
+            cy="134"
+            rx="119"
+            ry="7"
+          />
+
+          <path
+            class="companion-tail companion-tail-light"
+            d="M196 105 C220 92 250 97 262 111 C271 122 266 134 255 140 C238 149 207 142 183 128 L189 121 C211 135 237 139 251 132 C258 128 261 121 256 115 C248 104 224 102 202 113 Z"
+          />
+
+          <path
+            class="companion-tail"
+            d="M196 105 C220 92 250 97 262 111 C271 122 266 134 255 140 C238 149 207 142 183 128 L189 121 C211 135 237 139 251 132 C258 128 261 121 256 115 C248 104 224 102 202 113 Z"
+          />
+
+          <path
+            class="companion-tail-rim"
+            d="M202 106 C224 95 249 100 258 112 C266 123 259 134 247 138 C230 143 207 138 189 127"
+          />
+
+          <path
+            class="companion-silhouette companion-body"
+            d="M82 92 C100 71 129 59 165 59 C198 59 222 71 230 91 C236 107 226 120 208 125 C188 130 165 124 142 117 C122 111 104 112 91 106 C82 102 77 97 82 92 Z"
+          />
+
+          <path
+            class="companion-under-rim"
+            d="M91 106 C105 112 122 112 141 118 C163 125 187 131 208 126"
+          />
+
+          <path
+            class="companion-silhouette companion-foreleg"
+            d="M94 98 C82 106 70 112 55 115 C43 118 37 124 41 130 C46 136 62 135 78 132 L133 127 C143 126 149 121 146 115 C143 109 132 107 121 108 L99 110 Z"
+          />
+
+          <path
+            class="companion-silhouette companion-head"
+            d="M30 76 C26 62 31 49 42 42 L42 25 L58 37 C68 33 80 34 89 39 L105 30 L102 52 C112 60 115 75 109 87 C103 100 91 107 75 106 C56 105 41 98 33 87 C30 83 29 80 30 76 Z"
+          />
+
+          <path
+            class="companion-head-rim"
+            d="M30 76 C26 62 31 49 42 42 L42 25 L58 37 C68 33 80 34 89 39 L105 30 L102 52"
+          />
+
+          <path
+            class="companion-head-rim"
+            d="M109 87 C103 100 91 107 75 106 C56 105 41 98 33 87"
+          />
+
+          <path
+            class="companion-rim"
+            d="M86 89 C105 68 134 59 166 59 C194 59 216 68 226 83"
+          />
+
+          <path
+            class="companion-neck-rim"
+            d="M98 59 C108 67 112 78 109 88 C107 95 102 100 96 103"
+          />
+
+          <path
+            class="companion-ear-light"
+            d="M43 41 L43 27 L57 37"
+          />
+
+          <path
+            class="companion-ear-light"
+            d="M89 39 L103 32 L101 51"
+          />
+
+          <path
+            class="companion-eye"
+            d="M41 68 Q49 74 57 68"
+          />
+
+          <path
+            class="companion-eye"
+            d="M70 68 Q78 74 86 68"
+          />
+
+          <path
+            class="companion-nose"
+            d="M57 82 Q61 80 65 82 Q61 87 57 82 Z"
+          />
+
+          <path
+            class="companion-muzzle"
+            d="M61 85 C60 89 57 91 53 90 M61 85 C62 89 66 90 70 88"
+          />
+
+          <path
+            class="companion-whisker"
+            d="M41 80 C29 79 20 76 13 72 M40 87 C28 89 20 92 14 97"
+          />
+
+          <path
+            class="companion-shoulder"
+            d="M112 75 C121 86 123 99 117 110"
+          />
+
+          <path
+            class="companion-hind-detail"
+            d="M178 78 C198 88 204 107 193 123"
+          />
+
+          <path
+            class="companion-paw"
+            d="M43 129 C61 134 83 130 105 126"
+          />
+
+          <path
+            class="companion-paw companion-paw-back"
+            d="M57 119 C72 123 90 120 103 115"
+          />
+
+          <path
+            class="companion-toe"
+            d="M45 128 L50 126 M53 130 L58 127 M59 119 L64 117"
+          />
+        </svg>
+
+      </div>
+    </div>
 
     <!-- Área de páginas anteriores -->
     <section
@@ -170,6 +425,6 @@
   </main>
 
   <script src="pdf-export.js"></script>
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>
