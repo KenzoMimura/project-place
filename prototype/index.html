@@ -11,7 +11,7 @@
   <title>Nimsay</title>
 
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-  <link rel="stylesheet" href="style.css?v=21" />
+  <link rel="stylesheet" href="style.css?v=23" />
 </head>
 
 <body>
@@ -191,11 +191,13 @@
         />
       </svg>
 
-      <div
+      <button
         id="companion"
         class="companion"
-        role="img"
-        aria-label="Um gato preto dorme por perto"
+        type="button"
+        aria-label="Acariciar o gato e ativar o ronronar"
+        aria-pressed="false"
+        title="Acariciar e ouvir o ronronar"
       >
         <svg
           class="companion-cat"
@@ -271,6 +273,7 @@
             d="M202 106 C224 95 249 100 258 112 C266 123 259 134 247 138 C230 143 207 138 189 127"
           />
 
+          <g class="companion-body-breath">
           <path
             class="companion-silhouette companion-body"
             d="M82 92 C100 71 129 59 165 59 C198 59 222 71 230 91 C236 107 226 120 208 125 C188 130 165 124 142 117 C122 111 104 112 91 106 C82 102 77 97 82 92 Z"
@@ -286,6 +289,7 @@
             d="M94 98 C82 106 70 112 55 115 C43 118 37 124 41 130 C46 136 62 135 78 132 L133 127 C143 126 149 121 146 115 C143 109 132 107 121 108 L99 110 Z"
           />
 
+          <g class="companion-head-group">
           <path
             class="companion-silhouette companion-head"
             d="M30 76 C26 62 31 49 42 42 L42 25 L58 37 C68 33 80 34 89 39 L105 30 L102 52 C112 60 115 75 109 87 C103 100 91 107 75 106 C56 105 41 98 33 87 C30 83 29 80 30 76 Z"
@@ -302,22 +306,12 @@
           />
 
           <path
-            class="companion-rim"
-            d="M86 89 C105 68 134 59 166 59 C194 59 216 68 226 83"
-          />
-
-          <path
-            class="companion-neck-rim"
-            d="M98 59 C108 67 112 78 109 88 C107 95 102 100 96 103"
-          />
-
-          <path
             class="companion-ear-light"
             d="M43 41 L43 27 L57 37"
           />
 
           <path
-            class="companion-ear-light"
+            class="companion-ear-light companion-ear-right"
             d="M89 39 L103 32 L101 51"
           />
 
@@ -327,8 +321,16 @@
           />
 
           <path
-            class="companion-eye"
+            class="companion-eye companion-eye-right"
             d="M70 68 Q78 74 86 68"
+          />
+
+          <ellipse
+            class="companion-eye-open"
+            cx="78"
+            cy="70"
+            rx="2.3"
+            ry="1.35"
           />
 
           <path
@@ -344,6 +346,17 @@
           <path
             class="companion-whisker"
             d="M41 80 C29 79 20 76 13 72 M40 87 C28 89 20 92 14 97"
+          />
+          </g>
+
+          <path
+            class="companion-rim"
+            d="M86 89 C105 68 134 59 166 59 C194 59 216 68 226 83"
+          />
+
+          <path
+            class="companion-neck-rim"
+            d="M98 59 C108 67 112 78 109 88 C107 95 102 100 96 103"
           />
 
           <path
@@ -370,9 +383,17 @@
             class="companion-toe"
             d="M45 128 L50 126 M53 130 L58 127 M59 119 L64 117"
           />
+          </g>
         </svg>
 
-      </div>
+        <span
+          id="companionSoundLabel"
+          class="companion-sound-label"
+          aria-hidden="true"
+        >
+          ronronar
+        </span>
+      </button>
     </div>
 
     <!-- Área de páginas anteriores -->
@@ -425,6 +446,6 @@
   </main>
 
   <script src="pdf-export.js"></script>
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=6"></script>
 </body>
 </html>

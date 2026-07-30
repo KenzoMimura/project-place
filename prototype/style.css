@@ -256,17 +256,66 @@ body.dark .ambient-backdrop {
   left: 50%;
   bottom: clamp(5.25rem, 10.5vh, 8.5rem);
   width: min(230px, calc(100% - 1.5rem));
+  padding: 0;
 
   color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  pointer-events: auto;
   transform: translateX(
     calc(-50% + var(--companion-x))
   );
 }
 
+.companion:hover {
+  color: var(--muted);
+  background: transparent;
+  border-color: transparent;
+}
+
+.companion:focus-visible {
+  outline: none;
+}
+
+.companion:focus-visible .companion-sound-label {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .companion-cat {
+  display: block;
   width: 100%;
   height: auto;
   overflow: visible;
+}
+
+.companion-body-breath,
+.companion-head-group,
+.companion-tail,
+.companion-tail-rim,
+.companion-ear-right {
+  transform-box: fill-box;
+}
+
+.companion-body-breath {
+  transform-origin: 52% 88%;
+  animation: companion-breathe 5.8s ease-in-out infinite;
+}
+
+.companion-tail,
+.companion-tail-rim {
+  transform-origin: 10% 48%;
+  animation: companion-tail-rest 7.4s ease-in-out infinite;
+}
+
+.companion-head-group {
+  transform-origin: 72% 76%;
+}
+
+.companion-ear-right {
+  transform-origin: 50% 100%;
 }
 
 .companion-light {
@@ -363,6 +412,13 @@ body.dark .ambient-backdrop {
 .companion-eye {
   stroke-width: 1.35;
   opacity: 0.58;
+  transition: opacity 0.18s ease;
+}
+
+.companion-eye-open {
+  fill: var(--accent);
+  opacity: 0;
+  transition: opacity 0.18s ease;
 }
 
 .companion-muzzle {
@@ -383,6 +439,72 @@ body.dark .ambient-backdrop {
 .companion-toe {
   stroke-width: 0.7;
   opacity: 0.16;
+}
+
+.companion-sound-label {
+  position: absolute;
+  right: 0.9rem;
+  bottom: -1.45rem;
+
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: normal;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+
+  opacity: 0;
+  transform: translateY(-2px);
+  pointer-events: none;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.companion:hover .companion-sound-label,
+.companion:focus-visible .companion-sound-label,
+.companion[data-purring="true"] .companion-sound-label {
+  opacity: 0.72;
+  transform: translateY(0);
+}
+
+.companion[data-purring="true"] .companion-sound-label {
+  color: var(--accent);
+}
+
+.companion.is-writing .companion-body-breath {
+  animation-duration: 7.8s;
+}
+
+.companion.is-writing .companion-tail,
+.companion.is-writing .companion-tail-rim {
+  animation-play-state: paused;
+}
+
+.companion.is-idle .companion-tail,
+.companion.is-idle .companion-tail-rim {
+  animation-name: companion-tail-idle;
+  animation-duration: 4.8s;
+}
+
+.companion.is-idle .companion-ear-right {
+  animation: companion-ear-twitch 5.6s ease-in-out infinite;
+}
+
+.companion.is-reacting .companion-head-group {
+  animation: companion-look 0.9s ease-in-out;
+}
+
+.companion.is-reacting .companion-eye-right {
+  opacity: 0;
+}
+
+.companion.is-reacting .companion-eye-open {
+  opacity: 0.62;
+}
+
+.companion.is-purring .companion-light {
+  animation: companion-purr-light 2.4s ease-in-out infinite;
 }
 
 .companion-paw {
@@ -436,6 +558,14 @@ body.dark .companion-eye {
   opacity: 0.66;
 }
 
+body.dark .companion.is-reacting .companion-eye-right {
+  opacity: 0;
+}
+
+body.dark .companion.is-reacting .companion-eye-open {
+  opacity: 0.74;
+}
+
 body.dark .companion-muzzle {
   opacity: 0.36;
 }
@@ -466,6 +596,106 @@ body.dark .companion-hind-detail {
 
 body.dark .companion-tail-rim {
   opacity: 0.3;
+}
+
+@keyframes companion-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+
+  50% {
+    transform: translateY(-0.35px) scaleY(1.008);
+  }
+}
+
+@keyframes companion-tail-rest {
+  0%,
+  100% {
+    transform: rotate(0) translateY(0);
+  }
+
+  48% {
+    transform: rotate(0.65deg) translateY(-0.45px);
+  }
+}
+
+@keyframes companion-tail-idle {
+  0%,
+  62%,
+  100% {
+    transform: rotate(0) translateY(0);
+  }
+
+  70% {
+    transform: rotate(-1.8deg) translateY(-1px);
+  }
+
+  78% {
+    transform: rotate(1.1deg) translateY(0.3px);
+  }
+
+  86% {
+    transform: rotate(-0.55deg) translateY(-0.35px);
+  }
+}
+
+@keyframes companion-ear-twitch {
+  0%,
+  72%,
+  100% {
+    transform: rotate(0);
+  }
+
+  77% {
+    transform: rotate(-5deg);
+  }
+
+  81% {
+    transform: rotate(2.5deg);
+  }
+
+  85% {
+    transform: rotate(-1deg);
+  }
+}
+
+@keyframes companion-look {
+  0%,
+  100% {
+    transform: rotate(0) translateY(0);
+  }
+
+  28%,
+  66% {
+    transform: rotate(-1.8deg) translateY(-1.4px);
+  }
+}
+
+@keyframes companion-purr-light {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+
+  50% {
+    opacity: 0.17;
+  }
+}
+
+body.dark .companion.is-purring .companion-light {
+  animation-name: companion-purr-light-dark;
+}
+
+@keyframes companion-purr-light-dark {
+  0%,
+  100% {
+    opacity: 0.16;
+  }
+
+  50% {
+    opacity: 0.22;
+  }
 }
 
 .topbar {
@@ -1094,6 +1324,23 @@ textarea::placeholder {
     font-size: 0.82rem;
   }
 
+  .topbar-identity {
+    gap: 0.45rem;
+  }
+
+  #dateText {
+    font-size: 0.74rem;
+    white-space: nowrap;
+  }
+
+  .topbar-actions button {
+    flex-shrink: 0;
+    padding-left: 0.55rem;
+    padding-right: 0.55rem;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
   textarea {
     font-size: 1rem;
     line-height: 1.7;
@@ -1134,5 +1381,14 @@ textarea::placeholder {
   *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .companion-body-breath,
+  .companion-tail,
+  .companion-tail-rim,
+  .companion-ear-right,
+  .companion-head-group,
+  .companion-light {
+    animation: none !important;
   }
 }

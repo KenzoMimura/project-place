@@ -2,6 +2,9 @@ const STORAGE_KEY = "nimsayWritings";
 const DATED_ENTRIES_KEY = "nimsayEntries";
 const LEGACY_ENTRY_KEY = "entry";
 const THEME_KEY = "theme";
+const COMPANION_IDLE_DELAY = 12000;
+const COMPANION_WRITING_SETTLE_DELAY = 1600;
+const COMPANION_REACTION_DURATION = 900;
 
 const questions = [
   "O que ainda não encontrou palavras?",
@@ -32,6 +35,13 @@ const welcome = document.getElementById("welcome");
 const writingArea = document.getElementById("writingArea");
 const archiveArea = document.getElementById("archiveArea");
 const ambientScene = document.getElementById("ambientScene");
+const companion = document.getElementById("companion");
+const companionSoundLabel = document.getElementById(
+  "companionSoundLabel"
+);
+const companionDesktopQuery = window.matchMedia(
+  "(min-width: 1341px)"
+);
 
 const entry = document.getElementById("entry");
 const writingTitle = document.getElementById("writingTitle");
@@ -64,6 +74,11 @@ let isDirty = false;
 let viewTransitionTimeout;
 let writingNoticeTimeout;
 let ambientTransitionTimeout;
+let companionIdleTimeout;
+let companionWritingTimeout;
+let companionReactionTimeout;
+let purrAudio = null;
+let isPurring = false;
 
 /*
   Retorna a data local no formato YYYY-MM-DD.
@@ -179,6 +194,260 @@ function updateFinishButton(writing = getCurrentWriting()) {
   finishButton.disabled = !hasText || isCompleted;
 }
 
+function isWritingViewVisible() {
+  return !writingArea.classList.contains("hidden");
+}
+
+function setCompanionState(state) {
+  companion.classList.remove(
+    "is-resting",
+    "is-writing",
+    "is-idle"
+  );
+  companion.classList.add(`is-${state}`);
+  companion.dataset.state = state;
+}
+
+function scheduleCompanionIdle() {
+  clearTimeout(companionIdleTimeout);
+
+  if (
+    !companionDesktopQuery.matches ||
+    !isWritingViewVisible()
+  ) {
+    return;
+  }
+
+  companionIdleTimeout = setTimeout(() => {
+    setCompanionState("idle");
+  }, COMPANION_IDLE_DELAY);
+}
+
+function activateCompanion() {
+  clearTimeout(companionWritingTimeout);
+
+  if (!companionDesktopQuery.matches) {
+    setCompanionState("resting");
+    companion.dataset.state = "hidden";
+    return;
+  }
+
+  setCompanionState("resting");
+  scheduleCompanionIdle();
+}
+
+function stopCompanionActivity() {
+  clearTimeout(companionIdleTimeout);
+  clearTimeout(companionWritingTimeout);
+  clearTimeout(companionReactionTimeout);
+
+  companion.classList.remove(
+    "is-resting",
+    "is-writing",
+    "is-idle",
+    "is-reacting"
+  );
+  companion.dataset.state = "paused";
+  stopPurr();
+}
+
+function registerCompanionActivity(isWriting = false) {
+  if (
+    !companionDesktopQuery.matches ||
+    !isWritingViewVisible()
+  ) {
+    return;
+  }
+
+  clearTimeout(companionIdleTimeout);
+  clearTimeout(companionWritingTimeout);
+
+  if (isWriting) {
+    setCompanionState("writing");
+
+    companionWritingTimeout = setTimeout(() => {
+      setCompanionState("resting");
+      scheduleCompanionIdle();
+    }, COMPANION_WRITING_SETTLE_DELAY);
+
+    return;
+  }
+
+  setCompanionState("resting");
+  scheduleCompanionIdle();
+}
+
+function reactCompanion() {
+  clearTimeout(companionReactionTimeout);
+  companion.classList.remove("is-reacting");
+
+  /*
+    A leitura força o navegador a reiniciar a animação
+    mesmo em cliques consecutivos.
+  */
+  void companion.offsetWidth;
+  companion.classList.add("is-reacting");
+
+  companionReactionTimeout = setTimeout(() => {
+    companion.classList.remove("is-reacting");
+  }, COMPANION_REACTION_DURATION);
+}
+
+function updateCompanionSoundControl() {
+  companion.dataset.purring = String(isPurring);
+  companion.classList.toggle("is-purring", isPurring);
+  companion.setAttribute("aria-pressed", String(isPurring));
+
+  if (isPurring) {
+    companion.setAttribute(
+      "aria-label",
+      "Silenciar o ronronar do gato"
+    );
+    companion.title = "Silenciar o ronronar";
+    companionSoundLabel.textContent = "silenciar";
+    return;
+  }
+
+  companion.setAttribute(
+    "aria-label",
+    "Acariciar o gato e ativar o ronronar"
+  );
+  companion.title = "Acariciar e ouvir o ronronar";
+  companionSoundLabel.textContent = "ronronar";
+}
+
+function createPurrAudio() {
+  const AudioContextClass =
+    window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContextClass) {
+    return null;
+  }
+
+  const context = new AudioContextClass();
+  const masterGain = context.createGain();
+  const warmthFilter = context.createBiquadFilter();
+  const overtoneGain = context.createGain();
+  const pulse = context.createOscillator();
+  const pulseDepth = context.createGain();
+  const lowTone = context.createOscillator();
+  const overtone = context.createOscillator();
+  const now = context.currentTime;
+
+  warmthFilter.type = "lowpass";
+  warmthFilter.frequency.setValueAtTime(180, now);
+  warmthFilter.Q.setValueAtTime(0.7, now);
+
+  masterGain.gain.setValueAtTime(0.0001, now);
+  masterGain.gain.exponentialRampToValueAtTime(
+    0.018,
+    now + 0.28
+  );
+
+  lowTone.type = "sine";
+  lowTone.frequency.setValueAtTime(48, now);
+
+  overtone.type = "sine";
+  overtone.frequency.setValueAtTime(96, now);
+  overtoneGain.gain.setValueAtTime(0.16, now);
+
+  pulse.type = "sine";
+  pulse.frequency.setValueAtTime(4.1, now);
+  pulseDepth.gain.setValueAtTime(0.0045, now);
+
+  lowTone.connect(warmthFilter);
+  overtone.connect(overtoneGain);
+  overtoneGain.connect(warmthFilter);
+  warmthFilter.connect(masterGain);
+  pulse.connect(pulseDepth);
+  pulseDepth.connect(masterGain.gain);
+  masterGain.connect(context.destination);
+
+  lowTone.start();
+  overtone.start();
+  pulse.start();
+
+  if (context.state === "suspended") {
+    context.resume().catch(() => {});
+  }
+
+  return {
+    context,
+    masterGain,
+    oscillators: [lowTone, overtone, pulse]
+  };
+}
+
+function startPurr() {
+  if (isPurring) {
+    return;
+  }
+
+  try {
+    purrAudio = createPurrAudio();
+
+    if (!purrAudio) {
+      showWritingNotice("Som indisponível neste navegador");
+      return;
+    }
+
+    isPurring = true;
+    updateCompanionSoundControl();
+  } catch (error) {
+    console.warn("Não foi possível iniciar o ronronar:", error);
+    purrAudio = null;
+    isPurring = false;
+    updateCompanionSoundControl();
+    showWritingNotice("Som indisponível neste navegador");
+  }
+}
+
+function stopPurr() {
+  if (!purrAudio) {
+    isPurring = false;
+    updateCompanionSoundControl();
+    return;
+  }
+
+  const audioToStop = purrAudio;
+  const now = audioToStop.context.currentTime;
+  const currentVolume = Math.max(
+    audioToStop.masterGain.gain.value,
+    0.0001
+  );
+
+  purrAudio = null;
+  isPurring = false;
+  updateCompanionSoundControl();
+
+  audioToStop.masterGain.gain.cancelScheduledValues(now);
+  audioToStop.masterGain.gain.setValueAtTime(
+    currentVolume,
+    now
+  );
+  audioToStop.masterGain.gain.exponentialRampToValueAtTime(
+    0.0001,
+    now + 0.22
+  );
+
+  audioToStop.oscillators.forEach((oscillator) => {
+    oscillator.stop(now + 0.24);
+  });
+
+  setTimeout(() => {
+    audioToStop.context.close().catch(() => {});
+  }, 280);
+}
+
+function togglePurr() {
+  if (isPurring) {
+    stopPurr();
+    return;
+  }
+
+  startPurr();
+}
+
 function showView(nextView, focusTarget = null) {
   const views = [welcome, writingArea, archiveArea];
   const currentView = views.find(
@@ -201,6 +470,7 @@ function showView(nextView, focusTarget = null) {
     if (nextView === writingArea) {
       clearTimeout(ambientTransitionTimeout);
       ambientScene.classList.remove("hidden");
+      activateCompanion();
 
       requestAnimationFrame(() => {
         ambientScene.classList.add("visible");
@@ -226,6 +496,7 @@ function showView(nextView, focusTarget = null) {
   }
 
   if (nextView !== writingArea) {
+    stopCompanionActivity();
     ambientScene.classList.remove("visible");
     clearTimeout(ambientTransitionTimeout);
     ambientTransitionTimeout = setTimeout(() => {
@@ -599,13 +870,16 @@ beginButton.addEventListener("click", () => {
 entry.addEventListener("input", () => {
   updateFinishButton();
   scheduleSave();
+  registerCompanionActivity(true);
 });
 
 writingTitle.addEventListener("input", () => {
   scheduleSave();
+  registerCompanionActivity(true);
 });
 
 newQuestionButton.addEventListener("click", () => {
+  registerCompanionActivity();
   currentQuestion = getRandomQuestion(currentQuestion);
   question.textContent = currentQuestion;
 
@@ -692,6 +966,38 @@ themeButton.addEventListener("click", () => {
     : "Modo escuro";
 });
 
+companion.addEventListener("click", () => {
+  registerCompanionActivity();
+  reactCompanion();
+  togglePurr();
+});
+
+function handleCompanionViewportChange(event) {
+  if (event.matches && isWritingViewVisible()) {
+    activateCompanion();
+    return;
+  }
+
+  stopCompanionActivity();
+}
+
+if (typeof companionDesktopQuery.addEventListener === "function") {
+  companionDesktopQuery.addEventListener(
+    "change",
+    handleCompanionViewportChange
+  );
+} else {
+  companionDesktopQuery.addListener(
+    handleCompanionViewportChange
+  );
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    stopPurr();
+  }
+});
+
 /*
   Garante que o texto seja guardado caso a pessoa feche
   ou atualize a página antes do debounce terminar.
@@ -702,3 +1008,4 @@ window.addEventListener("beforeunload", () => {
 
 migrateLegacyData();
 applySavedTheme();
+updateCompanionSoundControl();
