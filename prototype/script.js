@@ -316,6 +316,34 @@ function updateCompanionSoundControl() {
   companionSoundLabel.textContent = "ronronar";
 }
 
+function createPurrNoiseBuffer(context) {
+  const duration = 2.4;
+  const frameCount = Math.floor(
+    context.sampleRate * duration
+  );
+  const buffer = context.createBuffer(
+    1,
+    frameCount,
+    context.sampleRate
+  );
+  const channel = buffer.getChannelData(0);
+  let smoothedNoise = 0;
+
+  for (let index = 0; index < frameCount; index += 1) {
+    const whiteNoise = Math.random() * 2 - 1;
+
+    /*
+      Suavizar o ruído retira o chiado agudo e cria uma
+      textura baixa, mais próxima de uma vibração corporal.
+    */
+    smoothedNoise =
+      smoothedNoise * 0.985 + whiteNoise * 0.015;
+    channel[index] = smoothedNoise * 2.8;
+  }
+
+  return buffer;
+}
+
 function createPurrAudio() {
   const AudioContextClass =
     window.AudioContext || window.webkitAudioContext;
@@ -327,45 +355,97 @@ function createPurrAudio() {
   const context = new AudioContextClass();
   const masterGain = context.createGain();
   const warmthFilter = context.createBiquadFilter();
-  const overtoneGain = context.createGain();
+  const noiseFilter = context.createBiquadFilter();
+  const compressor = context.createDynamicsCompressor();
+  const pulseGain = context.createGain();
+  const noiseGain = context.createGain();
+  const lowToneGain = context.createGain();
+  const harmonicGain = context.createGain();
+  const noise = context.createBufferSource();
+  const lowTone = context.createOscillator();
+  const harmonic = context.createOscillator();
   const pulse = context.createOscillator();
   const pulseDepth = context.createGain();
-  const lowTone = context.createOscillator();
-  const overtone = context.createOscillator();
+  const drift = context.createOscillator();
+  const driftDepth = context.createGain();
+  const breathing = context.createOscillator();
+  const breathingDepth = context.createGain();
   const now = context.currentTime;
 
   warmthFilter.type = "lowpass";
-  warmthFilter.frequency.setValueAtTime(180, now);
-  warmthFilter.Q.setValueAtTime(0.7, now);
+  warmthFilter.frequency.setValueAtTime(240, now);
+  warmthFilter.Q.setValueAtTime(0.55, now);
+
+  noiseFilter.type = "bandpass";
+  noiseFilter.frequency.setValueAtTime(105, now);
+  noiseFilter.Q.setValueAtTime(0.65, now);
+
+  compressor.threshold.setValueAtTime(-16, now);
+  compressor.knee.setValueAtTime(12, now);
+  compressor.ratio.setValueAtTime(3, now);
+  compressor.attack.setValueAtTime(0.015, now);
+  compressor.release.setValueAtTime(0.18, now);
 
   masterGain.gain.setValueAtTime(0.0001, now);
   masterGain.gain.exponentialRampToValueAtTime(
-    0.018,
-    now + 0.28
+    0.04,
+    now + 0.34
   );
 
-  lowTone.type = "sine";
-  lowTone.frequency.setValueAtTime(48, now);
+  noise.buffer = createPurrNoiseBuffer(context);
+  noise.loop = true;
+  noiseGain.gain.setValueAtTime(0.4, now);
 
-  overtone.type = "sine";
-  overtone.frequency.setValueAtTime(96, now);
-  overtoneGain.gain.setValueAtTime(0.16, now);
+  lowTone.type = "triangle";
+  lowTone.frequency.setValueAtTime(31, now);
+  lowToneGain.gain.setValueAtTime(0.24, now);
+
+  harmonic.type = "sine";
+  harmonic.frequency.setValueAtTime(62, now);
+  harmonicGain.gain.setValueAtTime(0.1, now);
 
   pulse.type = "sine";
-  pulse.frequency.setValueAtTime(4.1, now);
-  pulseDepth.gain.setValueAtTime(0.0045, now);
+  pulse.frequency.setValueAtTime(27, now);
+  pulseGain.gain.setValueAtTime(0.64, now);
+  pulseDepth.gain.setValueAtTime(0.22, now);
 
-  lowTone.connect(warmthFilter);
-  overtone.connect(overtoneGain);
-  overtoneGain.connect(warmthFilter);
-  warmthFilter.connect(masterGain);
+  drift.type = "sine";
+  drift.frequency.setValueAtTime(0.13, now);
+  driftDepth.gain.setValueAtTime(0.85, now);
+
+  breathing.type = "sine";
+  breathing.frequency.setValueAtTime(0.2, now);
+  breathingDepth.gain.setValueAtTime(0.0045, now);
+
+  noise.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(pulseGain);
+
+  lowTone.connect(lowToneGain);
+  lowToneGain.connect(pulseGain);
+  harmonic.connect(harmonicGain);
+  harmonicGain.connect(pulseGain);
+
   pulse.connect(pulseDepth);
-  pulseDepth.connect(masterGain.gain);
+  pulseDepth.connect(pulseGain.gain);
+
+  drift.connect(driftDepth);
+  driftDepth.connect(pulse.frequency);
+
+  breathing.connect(breathingDepth);
+  breathingDepth.connect(masterGain.gain);
+
+  pulseGain.connect(warmthFilter);
+  warmthFilter.connect(compressor);
+  compressor.connect(masterGain);
   masterGain.connect(context.destination);
 
+  noise.start();
   lowTone.start();
-  overtone.start();
+  harmonic.start();
   pulse.start();
+  drift.start();
+  breathing.start();
 
   if (context.state === "suspended") {
     context.resume().catch(() => {});
@@ -374,7 +454,14 @@ function createPurrAudio() {
   return {
     context,
     masterGain,
-    oscillators: [lowTone, overtone, pulse]
+    sources: [
+      noise,
+      lowTone,
+      harmonic,
+      pulse,
+      drift,
+      breathing
+    ]
   };
 }
 
@@ -430,8 +517,8 @@ function stopPurr() {
     now + 0.22
   );
 
-  audioToStop.oscillators.forEach((oscillator) => {
-    oscillator.stop(now + 0.24);
+  audioToStop.sources.forEach((source) => {
+    source.stop(now + 0.24);
   });
 
   setTimeout(() => {
